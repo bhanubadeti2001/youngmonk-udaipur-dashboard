@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: youngmonk-udaipur-dashboard
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: singapore
+    envVars:
+      - key: SPREADSHEET_ID
+        value: 1PiDruAwIELMPwgiVJ6TxTIqKqJeaw_LmTAyCNyEvLNM
+      - key: DASHBOARD_ACCESS_TOKEN
+        value: udaipur-hostel-key-2026
+      - key: PORT
+        value: 8080

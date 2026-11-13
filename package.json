@@ -1,0 +1,23 @@
+{
+  "name": "udaipur-hostel-dashboard",
+  "version": "1.0.0",
+  "description": "Autonomous Udaipur Hostel Competitor Monitoring & Availability Web Dashboard",
+  "main": "backend/main.py",
+  "scripts": {
+    "frontend:install": "cd frontend && npm install",
+    "frontend:build": "cd frontend && npm run build",
+    "frontend:dev": "cd frontend && npm run dev",
+    "backend:start": "cd backend && python main.py",
+    "crawler:run": "cd crawler && python main.py"
+  },
+  "keywords": [
+    "udaipur",
+    "hostel",
+    "occupancy-monitoring",
+    "fastapi",
+    "react",
+    "google-cloud-run"
+  ],
+  "author": "Antigravity Engineering",
+  "license": "ISC"
+}
