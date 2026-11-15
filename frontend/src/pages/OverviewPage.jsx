@@ -26,29 +26,32 @@ import {
 import StatusBadge from '../components/StatusBadge';
 import { authService } from '../services/api';
 
-export default function OverviewPage({ overview, hostels, onNavigate }) {
+export default function OverviewPage({ overview, hostels, onNavigate, city = 'udaipur' }) {
+  const isHyderabad = city === 'hyderabad' || overview?.city === 'hyderabad';
+  const defaultLeadName = isHyderabad ? 'Zostel Hyderabad' : 'Young Monk Hostel Udaipur';
+
   const ym = overview?.young_monk || {
-    name: 'Young Monk Hostel Udaipur',
-    category: 'B',
-    total_beds: 43,
-    available_beds: 11,
-    occupied_beds: 32,
+    name: defaultLeadName,
+    category: isHyderabad ? 'A' : 'B',
+    total_beds: isHyderabad ? 36 : 43,
+    available_beds: isHyderabad ? 10 : 11,
+    occupied_beds: isHyderabad ? 26 : 32,
     occupancy_pct: 74.4,
-    current_price: 850.0,
+    current_price: isHyderabad ? 799.0 : 850.0,
     weekly_avg_occupancy: 74.5,
-    weekly_avg_price: 850,
+    weekly_avg_price: isHyderabad ? 799 : 850,
     market_avg_occupancy: 62.2,
-    market_avg_price: 560,
+    market_avg_price: isHyderabad ? 849 : 560,
     category_b_avg_occupancy: 58.5,
     category_b_avg_price: 566,
     occupancy_outperformance: 12.3,
     occupancy_vs_cat_b: 16.0,
-    price_premium_vs_market: 290,
-    price_premium_vs_cat_b: 284,
+    price_premium_vs_market: 0,
+    price_premium_vs_cat_b: 0,
     category_b_rank: 1,
-    overall_market_rank: 3,
-    estimated_weekly_bed_nights: 225,
-    estimated_weekly_revenue: 191250,
+    overall_market_rank: 1,
+    estimated_weekly_bed_nights: 188,
+    estimated_weekly_revenue: 150000,
     status: 'AVAILABLE'
   };
 
@@ -57,7 +60,7 @@ export default function OverviewPage({ overview, hostels, onNavigate }) {
 
   const handleDownloadMonthlyCSV = () => {
     const token = authService.getToken();
-    const url = `/api/export/monthly-csv?month=2026-11`;
+    const url = `/api/export/monthly-csv?month=2026-11&city=${city}`;
     fetch(url, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
@@ -65,7 +68,8 @@ export default function OverviewPage({ overview, hostels, onNavigate }) {
       .then(blob => {
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `Young_Monk_Udaipur_Monthly_Audit_2026-11.csv`;
+        const prefix = isHyderabad ? 'Hyderabad_Hostels' : 'Young_Monk_Udaipur';
+        link.download = `${prefix}_Monthly_Audit_2026-11.csv`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -81,20 +85,24 @@ export default function OverviewPage({ overview, hostels, onNavigate }) {
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="px-2.5 py-0.5 rounded text-[10px] font-bold bg-softgreen text-white shadow-sm">
-                YOUR PROPERTY
+                {isHyderabad ? '📍 HYDERABAD MARKET' : 'YOUR PROPERTY'}
               </span>
               <span className="px-2.5 py-0.5 rounded text-[10px] font-bold bg-navy text-white">
-                Category B #1 Leader
+                {isHyderabad ? 'Category A Flagships' : 'Category B #1 Leader'}
               </span>
               <span className="text-xs font-semibold text-slate-500">
-                43 Verified Beds • {overview?.week_range || '7-Day Rolling Benchmark'}
+                {isHyderabad ? 'Zostel vs The Hosteller HITEC City' : '43 Verified Beds'} • {overview?.week_range || '7-Day Rolling Benchmark'}
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-navy mt-1 tracking-tight">
-              Young Monk Hostel Udaipur — 7-Day Executive Hub
+              {isHyderabad 
+                ? 'Hyderabad Hostels — Market Intelligence & Rate Monitor' 
+                : 'Young Monk Hostel Udaipur — 7-Day Executive Hub'}
             </h1>
             <p className="text-xs text-slate-500 mt-0.5 max-w-2xl">
-              Real-time competitive benchmark comparing Young Monk's occupancy velocity, pricing power, and bed utilization against all 10 Udaipur competitors.
+              {isHyderabad
+                ? 'Real-time competitive benchmark comparing Zostel Hyderabad and The Hosteller HITEC City occupancy velocity, dynamic rates, and inventory utilization.'
+                : "Real-time competitive benchmark comparing Young Monk's occupancy velocity, pricing power, and bed utilization against all 10 Udaipur competitors."}
             </p>
           </div>
 
@@ -148,7 +156,9 @@ export default function OverviewPage({ overview, hostels, onNavigate }) {
             <div className="mt-2">
               <div className="text-2xl sm:text-3xl font-bold text-navy tracking-tight">₹{ym.current_price}</div>
               <div className="text-[11px] font-semibold text-softgreen mt-0.5">
-                +₹{ym.price_premium_vs_cat_b} premium vs Cat B peers
+                {isHyderabad 
+                  ? `₹${ym.current_price} active bed rate` 
+                  : `+₹${ym.price_premium_vs_cat_b} premium vs Cat B peers`}
               </div>
             </div>
           </div>
@@ -163,10 +173,10 @@ export default function OverviewPage({ overview, hostels, onNavigate }) {
             </div>
             <div className="mt-2">
               <div className="text-xl sm:text-2xl font-bold text-navy tracking-tight">
-                #1 <span className="text-sm font-semibold text-slate-500">in Cat B</span>
+                #{ym.category_b_rank} <span className="text-sm font-semibold text-slate-500">in Cat {ym.category}</span>
               </div>
               <div className="text-[11px] font-semibold text-navy mt-0.5">
-                #3 Overall in Udaipur (out of 11)
+                #{ym.overall_market_rank} Overall in {overview?.city_name || (isHyderabad ? 'Hyderabad' : 'Udaipur')} (out of {overview?.total_hostels || (isHyderabad ? 2 : 11)})
               </div>
             </div>
           </div>

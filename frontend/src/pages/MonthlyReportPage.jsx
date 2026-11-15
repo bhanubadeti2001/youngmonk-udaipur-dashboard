@@ -24,7 +24,7 @@ import {
 } from 'recharts';
 import { dashboardApi, authService } from '../services/api';
 
-export default function MonthlyReportPage({ onNavigate }) {
+export default function MonthlyReportPage({ onNavigate, city = 'udaipur' }) {
   const [selectedMonth, setSelectedMonth] = useState('2026-11');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,10 +35,10 @@ export default function MonthlyReportPage({ onNavigate }) {
     { value: '2026-09', label: 'September 2026' },
   ];
 
-  const fetchMonthlyData = async (month) => {
+  const fetchMonthlyData = async (month, targetCity = city) => {
     setLoading(true);
     try {
-      const res = await dashboardApi.getMonthlyAnalysis(month);
+      const res = await dashboardApi.getMonthlyAnalysis(month, targetCity);
       setData(res);
     } catch (err) {
       console.error('Failed to load monthly data:', err);
@@ -48,12 +48,12 @@ export default function MonthlyReportPage({ onNavigate }) {
   };
 
   useEffect(() => {
-    fetchMonthlyData(selectedMonth);
-  }, [selectedMonth]);
+    fetchMonthlyData(selectedMonth, city);
+  }, [selectedMonth, city]);
 
   const handleDownloadCSV = () => {
     const token = authService.getToken();
-    const url = `/api/export/monthly-csv?month=${selectedMonth}`;
+    const url = `/api/export/monthly-csv?month=${selectedMonth}&city=${city}`;
     
     // Fetch with auth and trigger file download
     fetch(url, {
@@ -63,7 +63,8 @@ export default function MonthlyReportPage({ onNavigate }) {
       .then(blob => {
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `Young_Monk_Udaipur_Monthly_Audit_${selectedMonth}.csv`;
+        const prefix = city === 'hyderabad' ? 'Hyderabad_Hostels' : 'Young_Monk_Udaipur';
+        link.download = `${prefix}_Monthly_Audit_${selectedMonth}.csv`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

@@ -61,30 +61,31 @@ async function fetchWithAuth(url) {
 }
 
 export const dashboardApi = {
-  getOverview: () => fetchWithAuth(`${API_BASE}/dashboard/overview`),
-  getHostels: () => fetchWithAuth(`${API_BASE}/hostels`),
-  getCategories: () => fetchWithAuth(`${API_BASE}/categories`),
-  getPrices: () => fetchWithAuth(`${API_BASE}/prices`),
+  getCities: () => fetchWithAuth(`${API_BASE}/cities`),
+  getOverview: (city = 'udaipur') => fetchWithAuth(`${API_BASE}/dashboard/overview?city=${city}`),
+  getHostels: (city = 'udaipur') => fetchWithAuth(`${API_BASE}/hostels?city=${city}`),
+  getCategories: (city = 'udaipur') => fetchWithAuth(`${API_BASE}/categories?city=${city}`),
+  getPrices: (city = 'udaipur') => fetchWithAuth(`${API_BASE}/prices?city=${city}`),
   getTimeSlots: () => fetchWithAuth(`${API_BASE}/timeslots`),
   getHistory: (filter = 'today', start = null, end = null) => {
     let url = `${API_BASE}/history?filter=${filter}`;
     if (start && end) url += `&start_date=${start}&end_date=${end}`;
     return fetchWithAuth(url);
   },
-  getWeeklyAvailability: (startDate = null) => {
-    let url = `${API_BASE}/weekly-availability`;
-    if (startDate) url += `?start_date=${startDate}`;
+  getWeeklyAvailability: (startDate = null, city = 'udaipur') => {
+    let url = `${API_BASE}/weekly-availability?city=${city}`;
+    if (startDate) url += `&start_date=${startDate}`;
     return fetchWithAuth(url);
   },
-  getMonthlyAnalysis: (month = null) => {
-    let url = `${API_BASE}/monthly-analysis`;
-    if (month) url += `?month=${month}`;
+  getMonthlyAnalysis: (month = null, city = 'udaipur') => {
+    let url = `${API_BASE}/monthly-analysis?city=${city}`;
+    if (month) url += `&month=${month}`;
     return fetchWithAuth(url);
   },
-  getMonthlyCsvUrl: (month = null) => {
+  getMonthlyCsvUrl: (month = null, city = 'udaipur') => {
     const token = authService.getToken();
-    let url = `${API_BASE}/export/monthly-csv`;
-    if (month) url += `?month=${month}`;
+    let url = `${API_BASE}/export/monthly-csv?city=${city}`;
+    if (month) url += `&month=${month}`;
     return url;
   },
   getSystemStatus: () => fetchWithAuth(`${API_BASE}/system-status`),

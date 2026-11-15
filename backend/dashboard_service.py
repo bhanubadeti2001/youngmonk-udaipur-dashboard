@@ -9,17 +9,20 @@ logger = logging.getLogger("dashboard_service")
 IST = pytz.timezone("Asia/Kolkata")
 
 HOSTEL_CATALOG = [
-    {"id": "zostel-udaipur", "name": "Zostel Udaipur", "category": "A", "total_beds": 42, "default_price": 899.0},
-    {"id": "the-hosteller-udaipur", "name": "The Hosteller Udaipur", "category": "A", "total_beds": 29, "default_price": 1423.0},
-    {"id": "gostops-udaipur", "name": "goSTOPS Udaipur", "category": "A", "total_beds": 44, "default_price": 200.0},
-    {"id": "moustache-udaipur", "name": "Moustache Udaipur", "category": "A", "total_beds": 74, "default_price": 299.0},
-    {"id": "young-monk-udaipur", "name": "Young Monk Hostel Udaipur", "category": "B", "total_beds": 43, "default_price": 850.0},
-    {"id": "hostel-funky", "name": "Hostel Funky", "category": "B", "total_beds": 24, "default_price": 400.0},
-    {"id": "bunky-bunkyard", "name": "Bunky Bunkyard Hostel", "category": "B", "total_beds": 28, "default_price": 450.0},
-    {"id": "dream-yard", "name": "Dream Yard", "category": "C", "total_beds": 32, "default_price": 450.0},
-    {"id": "multiple-stories", "name": "Multiple Stories", "category": "C", "total_beds": 22, "default_price": 450.0},
-    {"id": "hype-hostel", "name": "Hype Hostel", "category": "C", "total_beds": 26, "default_price": 399.0},
-    {"id": "turtle-hostel", "name": "Turtle Hostel", "category": "C", "total_beds": 20, "default_price": 350.0},
+    {"id": "zostel-udaipur", "name": "Zostel Udaipur", "city": "udaipur", "category": "A", "total_beds": 42, "default_price": 899.0, "direct_url": "https://www.zostel.com/destination/udaipur/stay/udaipur-udph705"},
+    {"id": "the-hosteller-udaipur", "name": "The Hosteller Udaipur", "city": "udaipur", "category": "A", "total_beds": 29, "default_price": 1423.0, "direct_url": "https://www.thehosteller.com/hostels/the-hosteller-udaipur/"},
+    {"id": "gostops-udaipur", "name": "goSTOPS Udaipur", "city": "udaipur", "category": "A", "total_beds": 44, "default_price": 200.0, "direct_url": "https://gostops.com/stay/Udaipur"},
+    {"id": "moustache-udaipur", "name": "Moustache Udaipur", "city": "udaipur", "category": "A", "total_beds": 74, "default_price": 299.0, "direct_url": "https://w9r26vf4lk.execute-api.ap-south-1.amazonaws.com"},
+    {"id": "young-monk-udaipur", "name": "Young Monk Hostel Udaipur", "city": "udaipur", "category": "B", "total_beds": 43, "default_price": 850.0, "direct_url": "https://bookingengine.stayflexi.com/?hotel_id=33313"},
+    {"id": "hostel-funky", "name": "Hostel Funky", "city": "udaipur", "category": "B", "total_beds": 24, "default_price": 400.0, "direct_url": "https://www.hostelworld.com/st/hostels/p/hostel-funky-bunky-udaipur"},
+    {"id": "bunky-bunkyard", "name": "Bunky Bunkyard Hostel", "city": "udaipur", "category": "B", "total_beds": 28, "default_price": 450.0, "direct_url": "https://www.bunkyardhostel.com/"},
+    {"id": "dream-yard", "name": "Dream Yard", "city": "udaipur", "category": "C", "total_beds": 32, "default_price": 450.0, "direct_url": "https://www.hostelworld.com/st/hostels/p/dreamyard-udaipur"},
+    {"id": "multiple-stories", "name": "Multiple Stories", "city": "udaipur", "category": "C", "total_beds": 22, "default_price": 450.0, "direct_url": "https://www.booking.com/hotel/in/multiple-stories-udaipur.html"},
+    {"id": "hype-hostel", "name": "Hype Hostel", "city": "udaipur", "category": "C", "total_beds": 26, "default_price": 399.0, "direct_url": "https://www.booking.com/hotel/in/old-skool-udaipur-20-meter-from-lake.html"},
+    {"id": "turtle-hostel", "name": "Turtle Hostel", "city": "udaipur", "category": "C", "total_beds": 20, "default_price": 350.0, "direct_url": "https://www.booking.com/hotel/in/hostel-turtle-by-the-lake-10-meter-from-lake-pichola.html"},
+    # Hyderabad Hostels
+    {"id": "zostel-hyderabad", "name": "Zostel Hyderabad", "city": "hyderabad", "category": "A", "total_beds": 36, "default_price": 799.0, "direct_url": "https://www.zostel.com/destination/hyderabad/stay/zostel-hyderabad-hydh476?checkin=2026-11-15&checkout=2026-11-16"},
+    {"id": "the-hosteller-hyderabad", "name": "The Hosteller Hyderabad HITEC City", "city": "hyderabad", "category": "A", "total_beds": 48, "default_price": 899.0, "direct_url": "https://www.thehosteller.com/hostels/the-hosteller-hyderabad-HITEC-city/"},
 ]
 
 def parse_float(val: Any) -> Optional[float]:
@@ -114,7 +117,7 @@ class DashboardService:
 
         return parsed
 
-    def get_latest_hostels(self) -> List[Dict[str, Any]]:
+    def get_latest_hostels(self, city: Optional[str] = "udaipur") -> List[Dict[str, Any]]:
         rows = self._get_parsed_rows()
         latest_map = {}
 
@@ -126,12 +129,17 @@ class DashboardService:
             if name not in latest_map:
                 latest_map[name] = r
 
-        # Ensure all 11 catalog hostels are represented
+        catalog = HOSTEL_CATALOG
+        if city and city.lower() != "all":
+            catalog = [c for c in HOSTEL_CATALOG if c.get("city", "udaipur").lower() == city.lower()]
+
         results = []
-        for cat_item in HOSTEL_CATALOG:
+        for cat_item in catalog:
             name_key = cat_item["name"].strip().lower()
             if name_key in latest_map:
                 item = dict(latest_map[name_key])
+                item["city"] = cat_item.get("city", "udaipur")
+                item["direct_url"] = cat_item.get("direct_url", "")
                 if item["total_beds"] is None:
                     item["total_beds"] = cat_item["total_beds"]
                 if item["price"] is None:
@@ -142,30 +150,57 @@ class DashboardService:
                     item["occupancy_pct"] = round((item["occupied_beds"] / item["total_beds"]) * 100, 1)
                 results.append(item)
             else:
-                # Default baseline entry if not crawled yet
+                default_price = cat_item.get("default_price", 450.0)
+                total_b = cat_item["total_beds"]
+                avail_b = int(round(total_b * 0.35))
+                occ_b = total_b - avail_b
+                occ_p = round((occ_b / total_b) * 100, 1)
                 results.append({
                     "tracking_id": f"TRK-{cat_item['id'][:6].upper()}",
                     "report_date": datetime.now(IST).strftime("%Y-%m-%d"),
                     "time_slot": "Active",
+                    "city": cat_item.get("city", "udaipur"),
                     "category": cat_item["category"],
                     "hostel_name": cat_item["name"],
-                    "total_beds": cat_item["total_beds"],
-                    "available_beds": int(cat_item["total_beds"] * 0.3),
-                    "occupied_beds": int(cat_item["total_beds"] * 0.7),
-                    "occupancy_pct": 70.0,
-                    "price": 450.0,
+                    "total_beds": total_b,
+                    "available_beds": avail_b,
+                    "occupied_beds": occ_b,
+                    "occupancy_pct": occ_p,
+                    "price": default_price,
                     "currency": "INR",
                     "checkin": (datetime.now(IST) + timedelta(days=1)).strftime("%Y-%m-%d"),
                     "checkout": (datetime.now(IST) + timedelta(days=2)).strftime("%Y-%m-%d"),
-                    "source_url": "",
+                    "source_url": cat_item.get("direct_url", ""),
+                    "direct_url": cat_item.get("direct_url", ""),
                     "status": "AVAILABLE",
                     "last_updated": datetime.now(IST).strftime("%Y-%m-%d %H:%M:%S")
                 })
 
         return results
 
-    def get_overview(self) -> Dict[str, Any]:
-        hostels = self.get_latest_hostels()
+    def get_cities(self) -> List[Dict[str, Any]]:
+        return [
+            {
+                "id": "udaipur",
+                "name": "Udaipur",
+                "state": "Rajasthan",
+                "hostel_count": 11,
+                "flagship": "Young Monk Hostel Udaipur (Flagship)",
+                "categories": ["A", "B", "C"]
+            },
+            {
+                "id": "hyderabad",
+                "name": "Hyderabad",
+                "state": "Telangana",
+                "hostel_count": 2,
+                "flagship": "Zostel & The Hosteller HITEC City",
+                "categories": ["A"]
+            }
+        ]
+
+    def get_overview(self, city: str = "udaipur") -> Dict[str, Any]:
+        target_city = city.lower() if city else "udaipur"
+        hostels = self.get_latest_hostels(city=target_city)
         total_hostels = len(hostels)
         available_hostels = sum(1 for h in hostels if h["status"] in ["AVAILABLE", "LIMITED AVAILABILITY"])
         sold_out_hostels = sum(1 for h in hostels if h["status"] == "SOLD OUT")
@@ -174,31 +209,42 @@ class DashboardService:
         
         # Calculate lowest price from available hostels only
         available_prices = [h["price"] for h in hostels if h["status"] in ["AVAILABLE", "LIMITED AVAILABILITY"] and h["price"] is not None and h["price"] > 0]
-        lowest_price = min(available_prices) if available_prices else 200.0
+        lowest_price = min(available_prices) if available_prices else (799.0 if target_city == "hyderabad" else 200.0)
 
         # Calculate latest timestamp
         timestamps = [h["last_updated"] for h in hostels if h["last_updated"]]
         last_update = max(timestamps) if timestamps else datetime.now(IST).strftime("%Y-%m-%d %H:%M:%S")
 
-        # -------------------------------------------------------------
-        # Young Monk Hostel Udaipur Dedicated 7-Day Performance Profile
-        # -------------------------------------------------------------
-        weekly_info = self.get_weekly_availability()
+        weekly_info = self.get_weekly_availability(city=target_city)
         weekly_hostels = weekly_info.get("hostels", [])
         daily_trends = weekly_info.get("daily_trends", [])
 
-        # Locate Young Monk
-        ym_weekly = next((h for h in weekly_hostels if "young monk" in h["hostel_name"].lower()), None)
-        ym_latest = next((h for h in hostels if "young monk" in h["hostel_name"].lower()), None)
+        # -------------------------------------------------------------
+        # Determine Featured Focus Property
+        # For Udaipur -> Young Monk Hostel Udaipur
+        # For Hyderabad -> Zostel Hyderabad vs The Hosteller
+        # -------------------------------------------------------------
+        if target_city == "hyderabad":
+            lead_property = next((h for h in weekly_hostels if "zostel" in h["hostel_name"].lower()), weekly_hostels[0] if weekly_hostels else None)
+            lead_latest = next((h for h in hostels if "zostel" in h["hostel_name"].lower()), hostels[0] if hostels else None)
+            second_property = next((h for h in weekly_hostels if "hosteller" in h["hostel_name"].lower()), None)
+            prop_title = "Zostel Hyderabad"
+            cat_name = "A"
+        else:
+            lead_property = next((h for h in weekly_hostels if "young monk" in h["hostel_name"].lower()), None)
+            lead_latest = next((h for h in hostels if "young monk" in h["hostel_name"].lower()), None)
+            second_property = None
+            prop_title = "Young Monk Hostel Udaipur"
+            cat_name = "B"
 
-        ym_total_beds = ym_latest.get("total_beds", 43) if ym_latest else 43
-        ym_avail_beds = ym_latest.get("available_beds", 11) if ym_latest else 11
-        ym_occ_beds = ym_latest.get("occupied_beds", ym_total_beds - ym_avail_beds) if ym_latest else 32
-        ym_occ_pct = ym_latest.get("occupancy_pct", 74.4) if ym_latest else 74.4
-        ym_price = ym_latest.get("price", 850.0) if ym_latest else 850.0
+        ym_total_beds = lead_latest.get("total_beds", 43) if lead_latest else 43
+        ym_avail_beds = lead_latest.get("available_beds", 11) if lead_latest else 11
+        ym_occ_beds = lead_latest.get("occupied_beds", ym_total_beds - ym_avail_beds) if lead_latest else 32
+        ym_occ_pct = lead_latest.get("occupancy_pct", 74.4) if lead_latest else 74.4
+        ym_price = lead_latest.get("price", 850.0) if lead_latest else 850.0
 
-        ym_weekly_avg_occ = ym_weekly.get("weekly_avg_occupancy", 74.5) if ym_weekly else 74.5
-        ym_weekly_avg_price = ym_weekly.get("weekly_avg_price", 850) if ym_weekly else 850
+        ym_weekly_avg_occ = lead_property.get("weekly_avg_occupancy", 74.5) if lead_property else 74.5
+        ym_weekly_avg_price = lead_property.get("weekly_avg_price", 850) if lead_property else 850
 
         # Market-wide 7-day benchmarks
         all_weekly_occs = [h["weekly_avg_occupancy"] for h in weekly_hostels if h.get("weekly_avg_occupancy")]
@@ -206,21 +252,21 @@ class DashboardService:
         mkt_avg_occ = round(sum(all_weekly_occs) / len(all_weekly_occs), 1) if all_weekly_occs else 62.2
         mkt_avg_price = round(sum(all_weekly_prices) / len(all_weekly_prices)) if all_weekly_prices else 560
 
-        # Category B 7-day benchmarks
-        cat_b_hostels = [h for h in weekly_hostels if h.get("category") == "B"]
-        cat_b_occs = [h["weekly_avg_occupancy"] for h in cat_b_hostels if h.get("weekly_avg_occupancy")]
-        cat_b_prices = [h["weekly_avg_price"] for h in cat_b_hostels if h.get("weekly_avg_price")]
-        cat_b_avg_occ = round(sum(cat_b_occs) / len(cat_b_occs), 1) if cat_b_occs else 58.5
-        cat_b_avg_price = round(sum(cat_b_prices) / len(cat_b_prices)) if cat_b_prices else 566
+        # Category benchmarks
+        cat_hostels = [h for h in weekly_hostels if h.get("category") == cat_name]
+        cat_occs = [h["weekly_avg_occupancy"] for h in cat_hostels if h.get("weekly_avg_occupancy")]
+        cat_prices = [h["weekly_avg_price"] for h in cat_hostels if h.get("weekly_avg_price")]
+        cat_b_avg_occ = round(sum(cat_occs) / len(cat_occs), 1) if cat_occs else mkt_avg_occ
+        cat_b_avg_price = round(sum(cat_prices) / len(cat_prices)) if cat_prices else mkt_avg_price
 
         # Rankings
         sorted_by_occ = sorted(weekly_hostels, key=lambda x: x["weekly_avg_occupancy"], reverse=True)
-        mkt_rank = next((idx + 1 for idx, h in enumerate(sorted_by_occ) if "young monk" in h["hostel_name"].lower()), 3)
+        mkt_rank = next((idx + 1 for idx, h in enumerate(sorted_by_occ) if lead_property and h["hostel_name"] == lead_property["hostel_name"]), 1)
         
-        sorted_cat_b = sorted(cat_b_hostels, key=lambda x: x["weekly_avg_occupancy"], reverse=True)
-        cat_b_rank = next((idx + 1 for idx, h in enumerate(sorted_cat_b) if "young monk" in h["hostel_name"].lower()), 1)
+        sorted_cat = sorted(cat_hostels, key=lambda x: x["weekly_avg_occupancy"], reverse=True)
+        cat_b_rank = next((idx + 1 for idx, h in enumerate(sorted_cat) if lead_property and h["hostel_name"] == lead_property["hostel_name"]), 1)
 
-        # Estimated weekly revenue proxy (occupied beds * avg price * 7 days)
+        # Estimated weekly revenue proxy
         est_weekly_bed_nights = int(round((ym_weekly_avg_occ / 100.0) * ym_total_beds * 7))
         est_weekly_revenue = round(est_weekly_bed_nights * ym_weekly_avg_price)
 
@@ -228,12 +274,15 @@ class DashboardService:
         seven_day_points = []
         for d in weekly_info.get("days", []):
             d_date = d["date"]
-            ym_day = ym_weekly["days"].get(d_date, {}) if ym_weekly else {}
+            ym_day = lead_property["days"].get(d_date, {}) if lead_property else {}
             mkt_day = next((t for t in daily_trends if t["date"] == d_date), {})
 
-            # Cat B day avg
-            cat_b_day_occs = [h["days"].get(d_date, {}).get("occupancy_pct", 50) for h in cat_b_hostels]
-            cat_b_day_avg = round(sum(cat_b_day_occs) / len(cat_b_day_occs), 1) if cat_b_day_occs else 55.0
+            if target_city == "hyderabad" and second_property:
+                sec_day = second_property["days"].get(d_date, {})
+                cat_b_day_avg = sec_day.get("occupancy_pct", 72.0)
+            else:
+                cat_b_day_occs = [h["days"].get(d_date, {}).get("occupancy_pct", 50) for h in cat_hostels]
+                cat_b_day_avg = round(sum(cat_b_day_occs) / len(cat_b_day_occs), 1) if cat_b_day_occs else 55.0
 
             seven_day_points.append({
                 "date": d_date,
@@ -248,10 +297,10 @@ class DashboardService:
                 "young_monk_avail": ym_day.get("available_beds", ym_avail_beds)
             })
 
-        # Competitor Ranking list with Young Monk highlighted
+        # Competitor Ranking list
         competitor_ranking = []
         for h in sorted_by_occ:
-            is_ym = "young monk" in h["hostel_name"].lower()
+            is_featured = (lead_property and h["hostel_name"] == lead_property["hostel_name"])
             competitor_ranking.append({
                 "hostel_name": h["hostel_name"],
                 "category": h["category"],
@@ -259,13 +308,14 @@ class DashboardService:
                 "weekly_avg_occupancy": h["weekly_avg_occupancy"],
                 "weekly_avg_price": h["weekly_avg_price"],
                 "peak_day": h.get("peak_day", "Saturday"),
-                "is_young_monk": is_ym,
+                "is_young_monk": is_featured,
                 "occ_diff_vs_young_monk": round(h["weekly_avg_occupancy"] - ym_weekly_avg_occ, 1),
                 "price_diff_vs_young_monk": round(h["weekly_avg_price"] - ym_weekly_avg_price)
             })
 
         return {
-            # Global market counts
+            "city": target_city,
+            "city_name": "Hyderabad" if target_city == "hyderabad" else "Udaipur",
             "total_hostels": total_hostels,
             "available_hostels": available_hostels,
             "sold_out_hostels": sold_out_hostels,
@@ -274,10 +324,9 @@ class DashboardService:
             "last_successful_update": last_update,
             "stale_warning": False,
 
-            # Client Focus Property (Young Monk Hostel Udaipur)
             "young_monk": {
-                "name": "Young Monk Hostel Udaipur",
-                "category": "B",
+                "name": prop_title,
+                "category": cat_name,
                 "total_beds": ym_total_beds,
                 "available_beds": ym_avail_beds,
                 "occupied_beds": ym_occ_beds,
@@ -297,15 +346,15 @@ class DashboardService:
                 "overall_market_rank": mkt_rank,
                 "estimated_weekly_bed_nights": est_weekly_bed_nights,
                 "estimated_weekly_revenue": est_weekly_revenue,
-                "status": ym_latest.get("status", "AVAILABLE") if ym_latest else "AVAILABLE"
+                "status": lead_latest.get("status", "AVAILABLE") if lead_latest else "AVAILABLE"
             },
             "seven_day_comparison": seven_day_points,
             "competitor_ranking": competitor_ranking,
-            "week_range": weekly_info.get("week_range", "7-Day Rolling")
+            "week_range": weekly_info.get("week_range", "Mon 10 Nov – Sun 16 Nov 2026")
         }
 
-    def get_category_analysis(self) -> Dict[str, Any]:
-        hostels = self.get_latest_hostels()
+    def get_category_analysis(self, city: str = "udaipur") -> Dict[str, Any]:
+        hostels = self.get_latest_hostels(city=city)
         categories = {"A": [], "B": [], "C": []}
 
         for h in hostels:
@@ -337,8 +386,8 @@ class DashboardService:
 
         return cat_summary
 
-    def get_price_comparison(self) -> List[Dict[str, Any]]:
-        hostels = self.get_latest_hostels()
+    def get_price_comparison(self, city: str = "udaipur") -> List[Dict[str, Any]]:
+        hostels = self.get_latest_hostels(city=city)
         valid = [h for h in hostels if h["price"] is not None and h["price"] > 0]
         
         # Sort lowest to highest
@@ -437,11 +486,12 @@ class DashboardService:
 
         return {"time_slots": summary}
 
-    def get_weekly_availability(self, start_date_str: Optional[str] = None) -> Dict[str, Any]:
+    def get_weekly_availability(self, start_date_str: Optional[str] = None, city: str = "udaipur") -> Dict[str, Any]:
         """
-        Computes 7-day weekly availability and day-by-day breakdown across all 11 hostels.
-        Allows client to inspect weekly date slots (e.g. Nov 13 to Nov 20).
+        Computes 7-day weekly availability and day-by-day breakdown across hostels for the selected city.
+        Allows client to inspect weekly date slots (e.g. Mon to Sun).
         """
+        target_city = city.lower() if city else "udaipur"
         now = datetime.now(IST)
         if start_date_str:
             try:
@@ -470,7 +520,7 @@ class DashboardService:
                 "label": f"{d.strftime('%a')} ({d.strftime('%b %d')})" + (" [TODAY]" if is_today else "")
             })
 
-        latest_hostels = self.get_latest_hostels()
+        latest_hostels = self.get_latest_hostels(city=target_city)
         hostel_map = {h["hostel_name"]: h for h in latest_hostels}
 
         # Check existing historical rows for these dates
@@ -487,7 +537,9 @@ class DashboardService:
         daily_prices_sum = {d["date"]: [] for d in days}
         daily_occ_sum = {d["date"]: [] for d in days}
 
-        for cat_item in HOSTEL_CATALOG:
+        catalog = [c for c in HOSTEL_CATALOG if c.get("city", "udaipur").lower() == target_city]
+
+        for cat_item in catalog:
             name = cat_item["name"]
             category = cat_item["category"]
             total_beds = cat_item["total_beds"]
@@ -608,10 +660,11 @@ class DashboardService:
             "hostels": hostels_weekly
         }
 
-    def get_monthly_analysis(self, month_str: Optional[str] = None) -> Dict[str, Any]:
+    def get_monthly_analysis(self, month_str: Optional[str] = None, city: str = "udaipur") -> Dict[str, Any]:
         """
-        Computes 30-day comprehensive monthly performance audit for Young Monk Hostel Udaipur vs competitors.
+        Computes 30-day comprehensive monthly performance audit for hostels in the selected city.
         """
+        target_city = city.lower() if city else "udaipur"
         now = datetime.now(IST)
         if month_str:
             try:
@@ -646,7 +699,7 @@ class DashboardService:
                 "is_weekend": is_weekend
             })
 
-        latest_hostels = self.get_latest_hostels()
+        latest_hostels = self.get_latest_hostels(city=target_city)
         rows = self._get_parsed_rows()
         date_hostel_rows = {(r.get("report_date", ""), r.get("hostel_name", "")): r for r in rows}
 
@@ -657,12 +710,14 @@ class DashboardService:
         total_ym_bed_nights_sold = 0
         total_mkt_bed_nights_sold = 0
 
-        for cat_item in HOSTEL_CATALOG:
+        catalog = [c for c in HOSTEL_CATALOG if c.get("city", "udaipur").lower() == target_city]
+
+        for cat_item in catalog:
             name = cat_item["name"]
             category = cat_item["category"]
             total_beds = cat_item["total_beds"]
             base_price = cat_item.get("default_price", 450.0)
-            is_ym = "young monk" in name.lower()
+            is_ym = ("young monk" in name.lower()) if target_city == "udaipur" else ("zostel" in name.lower())
 
             hostel_occs = []
             hostel_prices = []
@@ -802,16 +857,17 @@ class DashboardService:
             "competitors_monthly": competitors_monthly
         }
 
-    def generate_monthly_csv(self, month_str: Optional[str] = None) -> str:
+    def generate_monthly_csv(self, month_str: Optional[str] = None, city: str = "udaipur") -> str:
         """
         Generates full downloadable CSV string containing 30-day performance audit.
         """
-        data = self.get_monthly_analysis(month_str)
+        data = self.get_monthly_analysis(month_str, city=city)
         month_name = data.get("month_name", "Monthly Audit")
+        city_title = city.upper() if city else "UDAIPUR"
         
         lines = []
-        lines.append(f"# UDAIPUR HOSTELS - MONTHLY AUDIT REPORT ({month_name})")
-        lines.append(f"# CLIENT PROPERTY: YOUNG MONK HOSTEL UDAIPUR (Category B)")
+        lines.append(f"# {city_title} HOSTEL INTELLIGENCE - MONTHLY AUDIT REPORT ({month_name})")
+        lines.append(f"# MARKET REGION: {city_title}")
         lines.append("")
         
         # Section 1: Monthly Executive Summary

@@ -7,7 +7,9 @@ export default function Header({
   refreshCountdown, 
   onManualRefresh, 
   isRefreshing,
-  onToggleMobileMenu
+  onToggleMobileMenu,
+  currentCity = 'udaipur',
+  onSelectCity
 }) {
   const [istTime, setIstTime] = useState('');
 
@@ -31,9 +33,11 @@ export default function Header({
     return () => clearInterval(interval);
   }, []);
 
+  const competitorText = currentCity === 'hyderabad' ? '2 Hyderabad Competitors' : '11 Udaipur Competitors';
+
   return (
-    <header className="h-16 bg-white border-b border-[#E5E8EB] flex items-center justify-between px-4 sm:px-6 md:px-8 shrink-0">
-      <div className="flex items-center gap-3">
+    <header className="h-16 bg-white border-b border-[#E5E8EB] flex items-center justify-between px-3 sm:px-6 md:px-8 shrink-0">
+      <div className="flex items-center gap-2 sm:gap-4 min-w-0">
         {/* Mobile Hamburger Menu Toggle */}
         <button
           onClick={onToggleMobileMenu}
@@ -43,12 +47,44 @@ export default function Header({
           <Menu className="w-5 h-5" />
         </button>
 
-        <div>
-          <h2 className="text-sm sm:text-base font-bold text-navy leading-tight truncate max-w-[180px] sm:max-w-none">
+        <div className="min-w-0">
+          <h2 className="text-xs sm:text-base font-bold text-navy leading-tight truncate max-w-[140px] sm:max-w-none">
             {activeTabTitle}
           </h2>
-          <p className="text-[10px] sm:text-[11px] text-slate-400">11 Udaipur Competitors • Live Cloud Sync</p>
+          <p className="text-[10px] sm:text-[11px] text-slate-400">{competitorText} • Live Cloud Sync</p>
         </div>
+
+        {/* City Toggle Pills in Header */}
+        {onSelectCity && (
+          <div className="flex items-center gap-1 bg-lightgrey p-1 rounded-xl border border-[#E5E8EB] ml-1 sm:ml-3">
+            <button
+              onClick={() => onSelectCity('udaipur')}
+              className={`px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1 ${
+                currentCity === 'udaipur'
+                  ? 'bg-navy text-white shadow-sm'
+                  : 'text-slate-600 hover:text-navy hover:bg-white/60'
+              }`}
+            >
+              <span>📍 Udaipur</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded font-semibold ${
+                currentCity === 'udaipur' ? 'bg-softgreen text-navy' : 'bg-slate-200 text-slate-600'
+              }`}>11</span>
+            </button>
+            <button
+              onClick={() => onSelectCity('hyderabad')}
+              className={`px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1 ${
+                currentCity === 'hyderabad'
+                  ? 'bg-navy text-white shadow-sm'
+                  : 'text-slate-600 hover:text-navy hover:bg-white/60'
+              }`}
+            >
+              <span>📍 Hyderabad</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded font-semibold ${
+                currentCity === 'hyderabad' ? 'bg-softgreen text-navy' : 'bg-slate-200 text-slate-600'
+              }`}>2</span>
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4 md:gap-6">

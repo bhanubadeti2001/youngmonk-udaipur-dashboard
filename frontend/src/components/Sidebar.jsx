@@ -33,7 +33,9 @@ export default function Sidebar({
   onLogout, 
   systemStatus,
   isOpen,
-  onClose
+  onClose,
+  currentCity = 'udaipur',
+  onSelectCity
 }) {
   const handleNavClick = (id) => {
     setActiveTab(id);
@@ -63,8 +65,10 @@ export default function Sidebar({
               <Building2 className="w-5 h-5 text-softgreen" />
             </div>
             <div>
-              <h1 className="text-sm font-bold text-navy tracking-tight leading-none">UDAIPUR HOSTELS</h1>
-              <p className="text-[11px] font-medium text-slate-400 mt-1">Availability Monitor</p>
+              <h1 className="text-sm font-bold text-navy tracking-tight leading-none uppercase">
+                {currentCity === 'hyderabad' ? 'HYDERABAD' : 'UDAIPUR'} HOSTELS
+              </h1>
+              <p className="text-[11px] font-medium text-slate-400 mt-1">Market Intelligence</p>
             </div>
           </div>
 
@@ -76,6 +80,43 @@ export default function Sidebar({
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Market City Switcher */}
+        {onSelectCity && (
+          <div className="p-3 border-b border-[#E5E8EB] bg-[#FAFBFD]">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+              Select Market
+            </div>
+            <div className="grid grid-cols-2 gap-1.5 p-1 bg-lightgrey rounded-xl border border-[#E5E8EB]">
+              <button
+                onClick={() => onSelectCity('udaipur')}
+                className={`flex flex-col items-center justify-center py-2 px-1.5 rounded-lg text-xs font-bold transition-all ${
+                  currentCity === 'udaipur'
+                    ? 'bg-navy text-white shadow-sm'
+                    : 'text-slate-600 hover:text-navy hover:bg-white/60'
+                }`}
+              >
+                <span>📍 Udaipur</span>
+                <span className={`text-[10px] font-medium ${currentCity === 'udaipur' ? 'text-softgreen' : 'text-slate-400'}`}>
+                  11 Hostels
+                </span>
+              </button>
+              <button
+                onClick={() => onSelectCity('hyderabad')}
+                className={`flex flex-col items-center justify-center py-2 px-1.5 rounded-lg text-xs font-bold transition-all ${
+                  currentCity === 'hyderabad'
+                    ? 'bg-navy text-white shadow-sm'
+                    : 'text-slate-600 hover:text-navy hover:bg-white/60'
+                }`}
+              >
+                <span>📍 Hyderabad</span>
+                <span className={`text-[10px] font-medium ${currentCity === 'hyderabad' ? 'text-softgreen' : 'text-slate-400'}`}>
+                  2 Hostels
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Navigation Links */}
         <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto custom-scrollbar">

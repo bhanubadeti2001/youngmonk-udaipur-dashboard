@@ -25,7 +25,7 @@ import {
 import { dashboardApi } from '../services/api';
 import StatusBadge from '../components/StatusBadge';
 
-export default function WeeklyReportPage() {
+export default function WeeklyReportPage({ city = 'udaipur' }) {
   const [selectedWeek, setSelectedWeek] = useState('2026-11-10');
   const [weeklyData, setWeeklyData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -38,10 +38,10 @@ export default function WeeklyReportPage() {
     { start: '2026-11-03', label: 'Mon 03 Nov – Sun 09 Nov 2026 (Previous Calendar Week)' },
   ];
 
-  const fetchWeeklyData = async (startDate) => {
+  const fetchWeeklyData = async (startDate, targetCity = city) => {
     setLoading(true);
     try {
-      const data = await dashboardApi.getWeeklyAvailability(startDate);
+      const data = await dashboardApi.getWeeklyAvailability(startDate, targetCity);
       setWeeklyData(data);
     } catch (err) {
       console.error('Failed to fetch weekly data:', err);
@@ -51,8 +51,8 @@ export default function WeeklyReportPage() {
   };
 
   useEffect(() => {
-    fetchWeeklyData(selectedWeek);
-  }, [selectedWeek]);
+    fetchWeeklyData(selectedWeek, city);
+  }, [selectedWeek, city]);
 
   const handleDownloadCSV = () => {
     if (!weeklyData || !weeklyData.hostels) return;
@@ -76,7 +76,8 @@ export default function WeeklyReportPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `Udaipur_Hostel_Weekly_Report_${selectedWeek}.csv`);
+    const cityName = city === 'hyderabad' ? 'Hyderabad' : 'Udaipur';
+    link.setAttribute('download', `${cityName}_Hostel_Weekly_Report_${selectedWeek}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

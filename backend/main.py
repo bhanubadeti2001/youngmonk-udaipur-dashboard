@@ -77,43 +77,56 @@ async def logout(request: Request, response: Response):
 # Protected Dashboard Endpoints
 # -------------------------------------------------------------
 
+@app.get("/api/cities", dependencies=[Depends(require_auth)])
+async def get_cities():
+    return dashboard_service.get_cities()
+
 @app.get("/api/dashboard/overview", dependencies=[Depends(require_auth)])
-async def get_overview():
-    return dashboard_service.get_overview()
+async def get_overview(city: str = Query("udaipur")):
+    return dashboard_service.get_overview(city=city)
 
 @app.get("/api/hostels", dependencies=[Depends(require_auth)])
-async def get_hostels():
-    return dashboard_service.get_latest_hostels()
+async def get_hostels(city: str = Query("udaipur")):
+    return dashboard_service.get_latest_hostels(city=city)
 
 @app.get("/api/categories", dependencies=[Depends(require_auth)])
-async def get_categories():
-    return dashboard_service.get_category_analysis()
+async def get_categories(city: str = Query("udaipur")):
+    return dashboard_service.get_category_analysis(city=city)
 
 @app.get("/api/prices", dependencies=[Depends(require_auth)])
-async def get_prices():
-    return dashboard_service.get_price_comparison()
+async def get_prices(city: str = Query("udaipur")):
+    return dashboard_service.get_price_comparison(city=city)
 
 @app.get("/api/timeslots", dependencies=[Depends(require_auth)])
 async def get_timeslots():
     return dashboard_service.get_timeslot_analysis()
 
 @app.get("/api/weekly-availability", dependencies=[Depends(require_auth)])
-async def get_weekly_availability(start_date: Optional[str] = Query(None)):
-    return dashboard_service.get_weekly_availability(start_date_str=start_date)
+async def get_weekly_availability(
+    start_date: Optional[str] = Query(None),
+    city: str = Query("udaipur")
+):
+    return dashboard_service.get_weekly_availability(start_date_str=start_date, city=city)
 
 @app.get("/api/monthly-analysis", dependencies=[Depends(require_auth)])
-async def get_monthly_analysis(month: Optional[str] = Query(None)):
-    return dashboard_service.get_monthly_analysis(month_str=month)
+async def get_monthly_analysis(
+    month: Optional[str] = Query(None),
+    city: str = Query("udaipur")
+):
+    return dashboard_service.get_monthly_analysis(month_str=month, city=city)
 
 @app.get("/api/export/monthly-csv", dependencies=[Depends(require_auth)])
-async def export_monthly_csv(month: Optional[str] = Query(None)):
-    csv_str = dashboard_service.generate_monthly_csv(month_str=month)
+async def export_monthly_csv(
+    month: Optional[str] = Query(None),
+    city: str = Query("udaipur")
+):
+    csv_str = dashboard_service.generate_monthly_csv(month_str=month, city=city)
     target_month = month or "current_month"
     return Response(
         content=csv_str,
         media_type="text/csv",
         headers={
-            "Content-Disposition": f"attachment; filename=Young_Monk_Udaipur_Monthly_Audit_{target_month}.csv"
+            "Content-Disposition": f"attachment; filename={city.capitalize()}_Hostels_Monthly_Audit_{target_month}.csv"
         }
     )
 

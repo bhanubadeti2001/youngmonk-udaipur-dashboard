@@ -30,6 +30,7 @@ export default function App() {
   const [authChecking, setAuthChecking] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [currentCity, setCurrentCity] = useState('udaipur');
   
   // Dashboard Data State
   const [overview, setOverview] = useState({});
@@ -74,15 +75,15 @@ export default function App() {
   }, []);
 
   // Fetch all live dashboard data
-  const loadDashboardData = useCallback(async () => {
+  const loadDashboardData = useCallback(async (city = currentCity) => {
     if (!isAuthenticated) return;
     setIsRefreshing(true);
     try {
       const [ov, ho, cat, pr, ts, sys] = await Promise.all([
-        dashboardApi.getOverview(),
-        dashboardApi.getHostels(),
-        dashboardApi.getCategories(),
-        dashboardApi.getPrices(),
+        dashboardApi.getOverview(city),
+        dashboardApi.getHostels(city),
+        dashboardApi.getCategories(city),
+        dashboardApi.getPrices(city),
         dashboardApi.getTimeSlots(),
         dashboardApi.getSystemStatus(),
       ]);
@@ -98,14 +99,20 @@ export default function App() {
     } finally {
       setIsRefreshing(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, currentCity]);
+
+  // Handle City Change
+  const handleSelectCity = (newCity) => {
+    setCurrentCity(newCity);
+    loadDashboardData(newCity);
+  };
 
   // Initial load when authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      loadDashboardData();
+      loadDashboardData(currentCity);
     }
-  }, [isAuthenticated, loadDashboardData]);
+  }, [isAuthenticated, currentCity, loadDashboardData]);
 
   // 60-Second Auto Refresh Interval & Countdown
   useEffect(() => {
@@ -113,7 +120,7 @@ export default function App() {
     const interval = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          loadDashboardData();
+          loadDashboardData(currentCity);
           return 60;
         }
         return prev - 1;
@@ -121,7 +128,7 @@ export default function App() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isAuthenticated, loadDashboardData]);
+  }, [isAuthenticated, currentCity, loadDashboardData]);
 
   const handleLogin = async (token) => {
     const success = await authService.login(token);
@@ -151,6 +158,20 @@ export default function App() {
     return <LoginPage onLogin={handleLogin} />;
   }
 
+  const getTabTitle = (tab) => {
+    if (tab === 'overview') {
+      return currentCity === 'hyderabad'
+        ? 'Hyderabad Hostels — Market Benchmark & Live Inventory'
+        : 'Young Monk Hostel Udaipur — 7-Day Performance Hub';
+    }
+    if (tab === 'monthly') {
+      return currentCity === 'hyderabad'
+        ? 'Hyderabad Hostels — 30-Day Monthly Performance Audit'
+        : 'Young Monk Hostel Udaipur — 30-Day Monthly Performance Audit';
+    }
+    return TAB_TITLES[tab] || '';
+  };
+
   return (
     <div className="flex h-screen bg-lightgrey overflow-hidden font-sans">
       {/* Navigation Sidebar */}
@@ -161,18 +182,22 @@ export default function App() {
         systemStatus={systemStatus}
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
+        currentCity={currentCity}
+        onSelectCity={handleSelectCity}
       />
 
       {/* Main View Area */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
         {/* Top Header */}
         <Header 
-          activeTabTitle={TAB_TITLES[activeTab]} 
+          activeTabTitle={getTabTitle(activeTab)} 
           lastUpdated={overview.last_successful_update}
           refreshCountdown={countdown}
-          onManualRefresh={loadDashboardData}
+          onManualRefresh={() => loadDashboardData(currentCity)}
           isRefreshing={isRefreshing}
           onToggleMobileMenu={() => setIsMobileMenuOpen(prev => !prev)}
+          currentCity={currentCity}
+          onSelectCity={handleSelectCity}
         />
 
         {/* View Page Content */}
@@ -182,29 +207,30 @@ export default function App() {
               <OverviewPage 
                 overview={overview} 
                 hostels={hostels} 
-                onNavigate={setActiveTab} 
+                onNavigate={setActiveTab}
+                city={currentCity}
               />
             )}
             {activeTab === 'availability' && (
-              <LiveAvailabilityPage hostels={hostels} />
+              <LiveAvailabilityPage hostels={hostels} city={currentCity} />
             )}
             {activeTab === 'weekly' && (
-              <WeeklyReportPage />
+              <WeeklyReportPage city={currentCity} />
             )}
             {activeTab === 'monthly' && (
-              <MonthlyReportPage onNavigate={setActiveTab} />
+              <MonthlyReportPage onNavigate={setActiveTab} city={currentCity} />
             )}
             {activeTab === 'categories' && (
-              <CategoryPage categories={categories} />
+              <CategoryPage categories={categories} city={currentCity} />
             )}
             {activeTab === 'pricing' && (
-              <PriceComparisonPage prices={prices} />
+              <PriceComparisonPage prices={prices} city={currentCity} />
             )}
             {activeTab === 'timeslots' && (
-              <TimeSlotPage timeSlots={timeSlots} hostels={hostels} />
+              <TimeSlotPage timeSlots={timeSlots} hostels={hostels} city={currentCity} />
             )}
             {activeTab === 'history' && (
-              <HistoricalPage />
+              <HistoricalPage city={currentCity} />
             )}
             {activeTab === 'system' && (
               <SystemStatusPage systemStatus={systemStatus} />

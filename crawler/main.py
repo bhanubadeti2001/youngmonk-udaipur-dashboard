@@ -30,6 +30,9 @@ HOSTELS = [
     {"id": "multiple-stories", "name": "Multiple Stories", "category": "C", "total_beds": 22, "crawler": "generic", "default_price": 450.0, "direct_url": "https://www.booking.com/hotel/in/multiple-stories-udaipur.html"},
     {"id": "hype-hostel", "name": "Hype Hostel", "category": "C", "total_beds": 26, "crawler": "generic", "default_price": 399.0, "direct_url": "https://www.booking.com/hotel/in/old-skool-udaipur-20-meter-from-lake.html"},
     {"id": "turtle-hostel", "name": "Turtle Hostel", "category": "C", "total_beds": 20, "crawler": "generic", "default_price": 350.0, "direct_url": "https://www.booking.com/hotel/in/hostel-turtle-by-the-lake-10-meter-from-lake-pichola.html"},
+    # Hyderabad Hostels
+    {"id": "zostel-hyderabad", "name": "Zostel Hyderabad", "city": "hyderabad", "category": "A", "total_beds": 36, "crawler": "zostel", "default_price": 799.0, "direct_url": "https://www.zostel.com/destination/hyderabad/stay/zostel-hyderabad-hydh476?checkin=2026-11-15&checkout=2026-11-16"},
+    {"id": "the-hosteller-hyderabad", "name": "The Hosteller Hyderabad HITEC City", "city": "hyderabad", "category": "A", "total_beds": 48, "crawler": "hosteller", "default_price": 899.0, "direct_url": "https://www.thehosteller.com/hostels/the-hosteller-hyderabad-HITEC-city/"},
 ]
 
 def insert_top_with_gap(sheet_title: str, rows: List[List[Any]], num_cols: int = 16):
