@@ -31,8 +31,8 @@ HOSTELS = [
     {"id": "hype-hostel", "name": "Hype Hostel", "category": "C", "total_beds": 26, "crawler": "generic", "default_price": 399.0, "direct_url": "https://www.booking.com/hotel/in/old-skool-udaipur-20-meter-from-lake.html"},
     {"id": "turtle-hostel", "name": "Turtle Hostel", "category": "C", "total_beds": 20, "crawler": "generic", "default_price": 350.0, "direct_url": "https://www.booking.com/hotel/in/hostel-turtle-by-the-lake-10-meter-from-lake-pichola.html"},
     # Hyderabad Hostels
-    {"id": "zostel-hyderabad", "name": "Zostel Hyderabad", "city": "hyderabad", "category": "A", "total_beds": 36, "crawler": "zostel", "default_price": 799.0, "direct_url": "https://www.zostel.com/destination/hyderabad/stay/zostel-hyderabad-hydh476?checkin=2026-11-15&checkout=2026-11-16"},
-    {"id": "the-hosteller-hyderabad", "name": "The Hosteller Hyderabad HITEC City", "city": "hyderabad", "category": "A", "total_beds": 48, "crawler": "hosteller", "default_price": 899.0, "direct_url": "https://www.thehosteller.com/hostels/the-hosteller-hyderabad-HITEC-city/"},
+    {"id": "zostel-hyderabad", "name": "Zostel Hyderabad", "city": "hyderabad", "category": "A", "total_beds": 36, "crawler": "zostel", "default_price": 799.0, "direct_url": "https://www.zostel.com/destination/hyderabad/stay/zostel-hyderabad-hydh476"},
+    {"id": "the-hosteller-hyderabad", "name": "The Hosteller Hyderabad HITEC City", "city": "hyderabad", "category": "A", "total_beds": 48, "crawler": "hosteller", "default_price": 430.0, "direct_url": "https://www.thehosteller.com/hostels/the-hosteller-hyderabad-HITEC-city/"},
 ]
 
 def insert_top_with_gap(sheet_title: str, rows: List[List[Any]], num_cols: int = 16):
@@ -106,9 +106,9 @@ def run_crawler_cycle():
 
         metrics = {}
         if h["crawler"] == "zostel":
-            metrics = crawl_zostel(context)
+            metrics = crawl_zostel(context, hostel_config=h)
         elif h["crawler"] == "hosteller":
-            metrics = crawl_hosteller(context)
+            metrics = crawl_hosteller(context, hostel_config=h)
         elif h["crawler"] == "stayflexi":
             metrics = crawl_young_monk(context)
         elif h["crawler"] == "moustache":
@@ -116,22 +116,41 @@ def run_crawler_cycle():
         else:
             metrics = crawl_generic_ota(h, context)
 
+        # Handle None availability from crawlers that can only get price
+        total_beds = metrics.get("total_beds") or h.get("total_beds", 30)
+        avail_beds = metrics.get("available_beds")
+        occ_beds = metrics.get("occupied_beds")
+        occ_pct = metrics.get("occupancy_pct")
+
+        if avail_beds is None:
+            # Cannot determine real availability; leave blank for sheet
+            avail_beds = ""
+            occ_beds = ""
+            occ_pct = ""
+            status = metrics.get("status", "AVAILABLE")
+        else:
+            if occ_beds is None:
+                occ_beds = max(0, total_beds - avail_beds)
+            if occ_pct is None:
+                occ_pct = round((occ_beds / total_beds) * 100, 1) if total_beds > 0 else 0.0
+            status = metrics.get("status", "AVAILABLE")
+
         row = [
             tracking_id,
             context["report_date"],
             context["slot"],
             h["category"],
             h["name"],
-            metrics.get("total_beds"),
-            metrics.get("available_beds"),
-            metrics.get("occupied_beds"),
-            metrics.get("occupancy_pct"),
-            metrics.get("price"),
+            total_beds,
+            avail_beds,
+            occ_beds,
+            occ_pct,
+            metrics.get("price") or h.get("default_price", ""),
             "INR",
             context["checkin_date"],
             context["checkout_date"],
             h.get("direct_url", ""),
-            metrics.get("status", "AVAILABLE"),
+            status,
             context["timestamp_ist"]
         ]
 
