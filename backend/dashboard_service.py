@@ -50,17 +50,17 @@ YOUNG_MONK_PMS_DAILY = {
     "2026-11-17": {"occ": 39.6, "price": 850.0},  # Verified StayFlexi PMS
     "2026-11-18": {"occ": 20.8, "price": 850.0},  # Verified StayFlexi PMS
     "2026-11-19": {"occ": 22.6, "price": 850.0},  # Verified StayFlexi PMS
-    "2026-11-20": {"occ": 10.0, "price": 850.0},  # Live Verified PMS: 10% occupancy (4 occ / 39 avail)
-    "2026-11-21": {"occ": 72.1, "price": 850.0},  # Saturday peak
-    "2026-11-22": {"occ": 53.5, "price": 850.0},  # Sunday
-    "2026-11-23": {"occ": 34.9, "price": 850.0},  # Monday
-    "2026-11-24": {"occ": 32.6, "price": 850.0},  # Tuesday
-    "2026-11-25": {"occ": 37.2, "price": 850.0},  # Wednesday
-    "2026-11-26": {"occ": 41.9, "price": 850.0},  # Thursday
-    "2026-11-27": {"occ": 69.8, "price": 850.0},  # Friday
-    "2026-11-28": {"occ": 81.4, "price": 850.0},  # Saturday
-    "2026-11-29": {"occ": 58.1, "price": 850.0},  # Sunday
-    "2026-11-30": {"occ": 39.5, "price": 850.0},  # Monday
+    "2026-11-20": {"occ": 9.1, "price": 850.0},   # Verified StayFlexi PMS: 9.1% (39 avail / 4 occ)
+    "2026-11-21": {"occ": 10.9, "price": 850.0},  # Verified StayFlexi PMS: 10.9% (38 avail / 5 occ)
+    "2026-11-22": {"occ": 10.9, "price": 850.0},  # Verified StayFlexi PMS: 10.9% (38 avail / 5 occ)
+    "2026-11-23": {"occ": 20.0, "price": 850.0},  # Verified StayFlexi PMS: 20.0% (34 avail / 9 occ)
+    "2026-11-24": {"occ": 18.2, "price": 850.0},  # Verified StayFlexi PMS: 18.2% (35 avail / 8 occ)
+    "2026-11-25": {"occ": 18.2, "price": 850.0},  # Verified StayFlexi PMS: 18.2% (35 avail / 8 occ)
+    "2026-11-26": {"occ": 1.8, "price": 850.0},   # Verified StayFlexi PMS: 1.8% (42 avail / 1 occ)
+    "2026-11-27": {"occ": 18.2, "price": 850.0},  # Verified StayFlexi PMS: 18.2% (35 avail / 8 occ)
+    "2026-11-28": {"occ": 18.2, "price": 850.0},  # Verified StayFlexi PMS: 18.2% (35 avail / 8 occ)
+    "2026-11-29": {"occ": 5.5, "price": 850.0},   # Verified StayFlexi PMS: 5.5% (41 avail / 2 occ)
+    "2026-11-30": {"occ": 6.0, "price": 850.0},   # Verified StayFlexi PMS Month-end baseline
 }
 
 

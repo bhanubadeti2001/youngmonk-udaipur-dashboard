@@ -139,7 +139,7 @@ def _fallback(context: dict = None, price_override: float = None) -> dict:
         occ = YOUNG_MONK_PMS_DAILY[report_date]["occ"]
         price = price_override or YOUNG_MONK_PMS_DAILY[report_date]["price"]
     else:
-        occ = 10.0
+        occ = 9.1
         price = price_override or 850.0
 
     occ_beds = int(round(total_beds * (occ / 100.0)))
