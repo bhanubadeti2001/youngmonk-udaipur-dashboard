@@ -1035,6 +1035,9 @@ class DashboardService:
             all_day_occs = [c["monthly_avg_occupancy"] for c in competitors_monthly]
             mkt_day_occ = round(sum(all_day_occs) / len(all_day_occs), 1)
 
+            ym_avail = max(0, 43 - int(round(43 * (ym_day_occ / 100.0))))
+            ym_occ_beds = 43 - ym_avail
+
             daily_tracking.append({
                 "date": d_str,
                 "display": d_info["display"],
@@ -1042,6 +1045,8 @@ class DashboardService:
                 "weekday": d_info["weekday"],
                 "is_weekend": d_info["is_weekend"],
                 "young_monk_occ": ym_day_occ,
+                "young_monk_avail": ym_avail,
+                "young_monk_occupied": ym_occ_beds,
                 "market_avg_occ": mkt_day_occ,
                 "young_monk_price": ym_day_price,
                 "market_avg_price": 545
