@@ -13,7 +13,7 @@ try:
     from dashboard_service import YOUNG_MONK_PMS_DAILY
 except Exception:
     YOUNG_MONK_PMS_DAILY = {
-        "2026-11-20": {"occ": 25.6, "price": 850.0}
+        "2026-11-20": {"occ": 10.0, "price": 850.0}
     }
 
 
@@ -139,7 +139,7 @@ def _fallback(context: dict = None, price_override: float = None) -> dict:
         occ = YOUNG_MONK_PMS_DAILY[report_date]["occ"]
         price = price_override or YOUNG_MONK_PMS_DAILY[report_date]["price"]
     else:
-        occ = 25.6
+        occ = 10.0
         price = price_override or 850.0
 
     occ_beds = int(round(total_beds * (occ / 100.0)))

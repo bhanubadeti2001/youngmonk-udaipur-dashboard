@@ -50,7 +50,7 @@ YOUNG_MONK_PMS_DAILY = {
     "2026-11-17": {"occ": 39.6, "price": 850.0},  # Verified StayFlexi PMS
     "2026-11-18": {"occ": 20.8, "price": 850.0},  # Verified StayFlexi PMS
     "2026-11-19": {"occ": 22.6, "price": 850.0},  # Verified StayFlexi PMS
-    "2026-11-20": {"occ": 25.6, "price": 850.0},  # Today
+    "2026-11-20": {"occ": 10.0, "price": 850.0},  # Live Verified PMS: 10% occupancy (4 occ / 39 avail)
     "2026-11-21": {"occ": 72.1, "price": 850.0},  # Saturday peak
     "2026-11-22": {"occ": 53.5, "price": 850.0},  # Sunday
     "2026-11-23": {"occ": 34.9, "price": 850.0},  # Monday
