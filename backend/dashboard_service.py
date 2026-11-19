@@ -272,16 +272,27 @@ class DashboardService:
         }
 
 
-    def get_latest_hostels(self, city: Optional[str] = "udaipur") -> List[Dict[str, Any]]:
+    def get_latest_hostels(self, city: Optional[str] = "udaipur", target_date: Optional[str] = None) -> List[Dict[str, Any]]:
         target_city = city.lower() if city else "udaipur"
         catalog = HOSTEL_CATALOG
         if target_city != "all":
             catalog = [c for c in HOSTEL_CATALOG if c.get("city", "udaipur").lower() == target_city]
 
         today_dt = datetime.now(IST)
-        today_str = today_dt.strftime("%Y-%m-%d")
-        is_weekend = today_dt.weekday() in [4, 5]
-        weekday = today_dt.strftime("%a")
+        if target_date:
+            try:
+                dt_obj = datetime.strptime(target_date, "%Y-%m-%d")
+                today_str = target_date
+                is_weekend = dt_obj.weekday() in [4, 5]
+                weekday = dt_obj.strftime("%a")
+            except Exception:
+                today_str = today_dt.strftime("%Y-%m-%d")
+                is_weekend = today_dt.weekday() in [4, 5]
+                weekday = today_dt.strftime("%a")
+        else:
+            today_str = today_dt.strftime("%Y-%m-%d")
+            is_weekend = today_dt.weekday() in [4, 5]
+            weekday = today_dt.strftime("%a")
 
         results = []
         for cat_item in catalog:
@@ -340,9 +351,9 @@ class DashboardService:
             }
         ]
 
-    def get_overview(self, city: str = "udaipur") -> Dict[str, Any]:
+    def get_overview(self, city: str = "udaipur", target_date: Optional[str] = None) -> Dict[str, Any]:
         target_city = city.lower() if city else "udaipur"
-        hostels = self.get_latest_hostels(city=target_city)
+        hostels = self.get_latest_hostels(city=target_city, target_date=target_date)
         total_hostels = len(hostels)
         available_hostels = sum(1 for h in hostels if h["status"] in ["AVAILABLE", "LIMITED AVAILABILITY"])
         sold_out_hostels = sum(1 for h in hostels if h["status"] == "SOLD OUT")
@@ -357,7 +368,7 @@ class DashboardService:
         timestamps = [h["last_updated"] for h in hostels if h["last_updated"]]
         last_update = max(timestamps) if timestamps else datetime.now(IST).strftime("%Y-%m-%d %H:%M:%S")
 
-        weekly_info = self.get_weekly_availability(city=target_city)
+        weekly_info = self.get_weekly_availability(start_date_str=target_date, city=target_city)
         weekly_hostels = weekly_info.get("hostels", [])
         daily_trends = weekly_info.get("daily_trends", [])
 
@@ -495,8 +506,8 @@ class DashboardService:
             "week_range": weekly_info.get("week_range", "Mon 10 Nov – Sun 16 Nov 2026")
         }
 
-    def get_category_analysis(self, city: str = "udaipur") -> Dict[str, Any]:
-        hostels = self.get_latest_hostels(city=city)
+    def get_category_analysis(self, city: str = "udaipur", target_date: Optional[str] = None) -> Dict[str, Any]:
+        hostels = self.get_latest_hostels(city=city, target_date=target_date)
         categories = {"A": [], "B": [], "C": []}
 
         for h in hostels:
@@ -528,8 +539,8 @@ class DashboardService:
 
         return cat_summary
 
-    def get_price_comparison(self, city: str = "udaipur") -> List[Dict[str, Any]]:
-        hostels = self.get_latest_hostels(city=city)
+    def get_price_comparison(self, city: str = "udaipur", target_date: Optional[str] = None) -> List[Dict[str, Any]]:
+        hostels = self.get_latest_hostels(city=city, target_date=target_date)
         valid = [h for h in hostels if h["price"] is not None and h["price"] > 0]
         
         # Sort lowest to highest

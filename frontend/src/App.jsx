@@ -31,6 +31,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentCity, setCurrentCity] = useState('udaipur');
+  const [snapshotDate, setSnapshotDate] = useState(null);
   
   // Dashboard Data State
   const [overview, setOverview] = useState({});
@@ -75,15 +76,15 @@ export default function App() {
   }, []);
 
   // Fetch all live dashboard data
-  const loadDashboardData = useCallback(async (city = currentCity) => {
+  const loadDashboardData = useCallback(async (city = currentCity, date = snapshotDate) => {
     if (!isAuthenticated) return;
     setIsRefreshing(true);
     try {
       const [ov, ho, cat, pr, ts, sys] = await Promise.all([
-        dashboardApi.getOverview(city),
-        dashboardApi.getHostels(city),
-        dashboardApi.getCategories(city),
-        dashboardApi.getPrices(city),
+        dashboardApi.getOverview(city, date),
+        dashboardApi.getHostels(city, date),
+        dashboardApi.getCategories(city, date),
+        dashboardApi.getPrices(city, date),
         dashboardApi.getTimeSlots(),
         dashboardApi.getSystemStatus(),
       ]);
@@ -99,20 +100,26 @@ export default function App() {
     } finally {
       setIsRefreshing(false);
     }
-  }, [isAuthenticated, currentCity]);
+  }, [isAuthenticated, currentCity, snapshotDate]);
 
   // Handle City Change
   const handleSelectCity = (newCity) => {
     setCurrentCity(newCity);
-    loadDashboardData(newCity);
+    loadDashboardData(newCity, snapshotDate);
+  };
+
+  // Handle Snapshot Date Change
+  const handleSelectSnapshotDate = (newDate) => {
+    setSnapshotDate(newDate);
+    loadDashboardData(currentCity, newDate);
   };
 
   // Initial load when authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      loadDashboardData(currentCity);
+      loadDashboardData(currentCity, snapshotDate);
     }
-  }, [isAuthenticated, currentCity, loadDashboardData]);
+  }, [isAuthenticated, currentCity, snapshotDate, loadDashboardData]);
 
   // 60-Second Auto Refresh Interval & Countdown
   useEffect(() => {
@@ -120,7 +127,7 @@ export default function App() {
     const interval = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          loadDashboardData(currentCity);
+          loadDashboardData(currentCity, snapshotDate);
           return 60;
         }
         return prev - 1;
@@ -128,7 +135,7 @@ export default function App() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isAuthenticated, currentCity, loadDashboardData]);
+  }, [isAuthenticated, currentCity, snapshotDate, loadDashboardData]);
 
   const handleLogin = async (token) => {
     const success = await authService.login(token);
@@ -193,11 +200,13 @@ export default function App() {
           activeTabTitle={getTabTitle(activeTab)} 
           lastUpdated={overview.last_successful_update}
           refreshCountdown={countdown}
-          onManualRefresh={() => loadDashboardData(currentCity)}
+          onManualRefresh={() => loadDashboardData(currentCity, snapshotDate)}
           isRefreshing={isRefreshing}
           onToggleMobileMenu={() => setIsMobileMenuOpen(prev => !prev)}
           currentCity={currentCity}
           onSelectCity={handleSelectCity}
+          selectedSnapshotDate={snapshotDate}
+          onSelectSnapshotDate={handleSelectSnapshotDate}
         />
 
         {/* View Page Content */}
@@ -209,10 +218,11 @@ export default function App() {
                 hostels={hostels} 
                 onNavigate={setActiveTab}
                 city={currentCity}
+                snapshotDate={snapshotDate}
               />
             )}
             {activeTab === 'availability' && (
-              <LiveAvailabilityPage hostels={hostels} city={currentCity} />
+              <LiveAvailabilityPage hostels={hostels} city={currentCity} snapshotDate={snapshotDate} />
             )}
             {activeTab === 'weekly' && (
               <WeeklyReportPage city={currentCity} />

@@ -9,7 +9,9 @@ export default function Header({
   isRefreshing,
   onToggleMobileMenu,
   currentCity = 'udaipur',
-  onSelectCity
+  onSelectCity,
+  selectedSnapshotDate = null,
+  onSelectSnapshotDate
 }) {
   const [istTime, setIstTime] = useState('');
 
@@ -87,10 +89,51 @@ export default function Header({
         )}
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-4 md:gap-6">
-        {/* IST Clock - hidden on very small screens, visible on sm+ */}
-        <div className="hidden sm:flex items-center gap-2 text-xs text-slate-600 bg-lightgrey px-3 py-1.5 rounded-lg border border-[#E5E8EB]">
-          <Calendar className="w-3.5 h-3.5 text-navy" />
+      <div className="flex items-center gap-2 sm:gap-3 md:gap-5">
+        {/* Previous Days Historical Snapshot Selector */}
+        {onSelectSnapshotDate && (
+          <div className="flex items-center gap-1.5 bg-lightgrey px-2 sm:px-3 py-1 rounded-lg border border-[#E5E8EB]">
+            <Calendar className="w-3.5 h-3.5 text-navy shrink-0" />
+            <div className="flex flex-col">
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none">
+                Audit Snapshot
+              </span>
+              <select
+                value={selectedSnapshotDate || 'live'}
+                onChange={(e) => onSelectSnapshotDate(e.target.value === 'live' ? null : e.target.value)}
+                className="bg-transparent text-xs font-bold text-navy focus:outline-none cursor-pointer pr-1 py-0.5"
+                title="Select a previous day to inspect that exact historical snapshot"
+              >
+                <option value="live">⚡ Live (Current View)</option>
+                <optgroup label="Previous Day Snapshots (Audit Accuracy)">
+                  <option value="2026-11-20">Fri, 20 Nov 2026 (Today)</option>
+                  <option value="2026-11-19">Thu, 19 Nov 2026 (PMS: 22.6%)</option>
+                  <option value="2026-11-18">Wed, 18 Nov 2026 (PMS: 20.8%)</option>
+                  <option value="2026-11-17">Tue, 17 Nov 2026 (PMS: 39.6%)</option>
+                  <option value="2026-11-16">Mon, 16 Nov 2026 (PMS: 39.6%)</option>
+                  <option value="2026-11-15">Sun, 15 Nov 2026 (PMS: 51.0%)</option>
+                  <option value="2026-11-14">Sat, 14 Nov 2026 (PMS: 83.0%)</option>
+                  <option value="2026-11-13">Fri, 13 Nov 2026 (PMS: 51.9%)</option>
+                  <option value="2026-11-12">Thu, 12 Nov 2026 (PMS: 96.2%)</option>
+                  <option value="2026-11-11">Wed, 11 Nov 2026 (PMS: 98.2%)</option>
+                  <option value="2026-11-10">Tue, 10 Nov 2026 (PMS: 90.6%)</option>
+                  <option value="2026-11-09">Mon, 09 Nov 2026 (PMS: 54.0%)</option>
+                  <option value="2026-11-08">Sun, 08 Nov 2026 (PMS: 62.0%)</option>
+                  <option value="2026-11-07">Sat, 07 Nov 2026 (PMS: 88.0%)</option>
+                  <option value="2026-11-06">Fri, 06 Nov 2026 (PMS: 78.5%)</option>
+                  <option value="2026-11-05">Thu, 05 Nov 2026 (PMS: 46.5%)</option>
+                  <option value="2026-11-04">Wed, 04 Nov 2026 (PMS: 45.0%)</option>
+                  <option value="2026-11-03">Tue, 03 Nov 2026 (PMS: 48.0%)</option>
+                  <option value="2026-11-02">Mon, 02 Nov 2026 (PMS: 52.0%)</option>
+                  <option value="2026-11-01">Sun, 01 Nov 2026 (PMS: 68.0%)</option>
+                </optgroup>
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* IST Clock - hidden on smaller screens */}
+        <div className="hidden lg:flex items-center gap-2 text-xs text-slate-600 bg-lightgrey px-3 py-1.5 rounded-lg border border-[#E5E8EB]">
           <span className="font-medium text-navy">{istTime} <span className="text-slate-400 font-normal">IST</span></span>
         </div>
 
@@ -113,10 +156,23 @@ export default function Header({
           </button>
         </div>
 
-        {/* Live Pill */}
-        <div className="flex items-center gap-1.5 sm:gap-2 pl-2 sm:pl-4 border-l border-[#E5E8EB]">
-          <span className="w-2 h-2 rounded-full bg-softgreen animate-pulse"></span>
-          <span className="text-[11px] sm:text-xs font-semibold text-navy hidden xs:inline">Live</span>
+        {/* Status Pill: Live vs Historical Snapshot */}
+        <div className="flex items-center gap-1.5 sm:gap-2 pl-2 sm:pl-3 border-l border-[#E5E8EB]">
+          {selectedSnapshotDate ? (
+            <button
+              onClick={() => onSelectSnapshotDate(null)}
+              title="Click to reset to Live real-time view"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 hover:bg-amber-100 text-xs font-bold border border-amber-200 transition-all cursor-pointer shadow-2xs"
+            >
+              <span>⏪ {selectedSnapshotDate.slice(5)}</span>
+              <span className="text-[10px] text-amber-500 font-normal ml-0.5">✕ Live</span>
+            </button>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-softgreen animate-pulse"></span>
+              <span className="text-[11px] sm:text-xs font-semibold text-navy hidden xs:inline">Live</span>
+            </div>
+          )}
         </div>
       </div>
     </header>

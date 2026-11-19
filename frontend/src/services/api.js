@@ -62,10 +62,26 @@ async function fetchWithAuth(url) {
 
 export const dashboardApi = {
   getCities: () => fetchWithAuth(`${API_BASE}/cities`),
-  getOverview: (city = 'udaipur') => fetchWithAuth(`${API_BASE}/dashboard/overview?city=${city}`),
-  getHostels: (city = 'udaipur') => fetchWithAuth(`${API_BASE}/hostels?city=${city}`),
-  getCategories: (city = 'udaipur') => fetchWithAuth(`${API_BASE}/categories?city=${city}`),
-  getPrices: (city = 'udaipur') => fetchWithAuth(`${API_BASE}/prices?city=${city}`),
+  getOverview: (city = 'udaipur', date = null) => {
+    let url = `${API_BASE}/dashboard/overview?city=${city}`;
+    if (date) url += `&date=${date}`;
+    return fetchWithAuth(url);
+  },
+  getHostels: (city = 'udaipur', date = null) => {
+    let url = `${API_BASE}/hostels?city=${city}`;
+    if (date) url += `&date=${date}`;
+    return fetchWithAuth(url);
+  },
+  getCategories: (city = 'udaipur', date = null) => {
+    let url = `${API_BASE}/categories?city=${city}`;
+    if (date) url += `&date=${date}`;
+    return fetchWithAuth(url);
+  },
+  getPrices: (city = 'udaipur', date = null) => {
+    let url = `${API_BASE}/prices?city=${city}`;
+    if (date) url += `&date=${date}`;
+    return fetchWithAuth(url);
+  },
   getTimeSlots: () => fetchWithAuth(`${API_BASE}/timeslots`),
   getHistory: (filter = 'today', start = null, end = null) => {
     let url = `${API_BASE}/history?filter=${filter}`;

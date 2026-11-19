@@ -82,20 +82,20 @@ async def get_cities():
     return dashboard_service.get_cities()
 
 @app.get("/api/dashboard/overview", dependencies=[Depends(require_auth)])
-async def get_overview(city: str = Query("udaipur")):
-    return dashboard_service.get_overview(city=city)
+async def get_overview(city: str = Query("udaipur"), date: Optional[str] = Query(None)):
+    return dashboard_service.get_overview(city=city, target_date=date)
 
 @app.get("/api/hostels", dependencies=[Depends(require_auth)])
-async def get_hostels(city: str = Query("udaipur")):
-    return dashboard_service.get_latest_hostels(city=city)
+async def get_hostels(city: str = Query("udaipur"), date: Optional[str] = Query(None)):
+    return dashboard_service.get_latest_hostels(city=city, target_date=date)
 
 @app.get("/api/categories", dependencies=[Depends(require_auth)])
-async def get_categories(city: str = Query("udaipur")):
-    return dashboard_service.get_category_analysis(city=city)
+async def get_categories(city: str = Query("udaipur"), date: Optional[str] = Query(None)):
+    return dashboard_service.get_category_analysis(city=city, target_date=date)
 
 @app.get("/api/prices", dependencies=[Depends(require_auth)])
-async def get_prices(city: str = Query("udaipur")):
-    return dashboard_service.get_price_comparison(city=city)
+async def get_prices(city: str = Query("udaipur"), date: Optional[str] = Query(None)):
+    return dashboard_service.get_price_comparison(city=city, target_date=date)
 
 @app.get("/api/timeslots", dependencies=[Depends(require_auth)])
 async def get_timeslots():
